@@ -24,6 +24,7 @@ Endpoints:
 
 - `POST /places/search` (free-text query + filters)
 - `GET /places/{place_id}` (place details)
+- `POST /locations/resolve` (resolve a user-provided location string)
 
 Example search request:
 
@@ -63,6 +64,17 @@ curl -X POST http://127.0.0.1:8000/places/search \
       "price_levels": [1, 2, 3]
     },
     "limit": 10
+  }'
+```
+
+Example resolve request (curl):
+
+```bash
+curl -X POST http://127.0.0.1:8000/locations/resolve \
+  -H "Content-Type: application/json" \
+  -d '{
+    "location_text": "Riverside Park, New York",
+    "limit": 5
   }'
 ```
 

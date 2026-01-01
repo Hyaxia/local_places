@@ -134,6 +134,43 @@
         "title": "LocationBias",
         "type": "object"
       },
+      "LocationResolveRequest": {
+        "properties": {
+          "limit": {
+            "default": 5,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "location_text": {
+            "minLength": 1,
+            "title": "Location Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "location_text"
+        ],
+        "title": "LocationResolveRequest",
+        "type": "object"
+      },
+      "LocationResolveResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedLocation"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "title": "LocationResolveResponse",
+        "type": "object"
+      },
       "PlaceDetails": {
         "properties": {
           "address": {
@@ -354,6 +391,65 @@
         "title": "PlaceSummary",
         "type": "object"
       },
+      "ResolvedLocation": {
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LatLng"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "place_id": {
+            "title": "Place Id",
+            "type": "string"
+          },
+          "types": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Types"
+          }
+        },
+        "required": [
+          "place_id"
+        ],
+        "title": "ResolvedLocation",
+        "type": "object"
+      },
       "SearchRequest": {
         "properties": {
           "filters": {
@@ -474,6 +570,44 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/locations/resolve": {
+      "post": {
+        "operationId": "locations_resolve_locations_resolve_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationResolveResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Locations Resolve"
+      }
+    },
     "/ping": {
       "get": {
         "operationId": "ping_ping_get",

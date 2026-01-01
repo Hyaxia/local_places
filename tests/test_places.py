@@ -142,3 +142,58 @@ def test_places_search_logs_google_error(caplog, monkeypatch) -> None:
 
     assert response.status_code == 502
     assert any("Google Places API error 403" in record.message for record in caplog.records)
+
+
+def test_locations_resolve_returns_results(monkeypatch) -> None:
+    payload = {
+        "places": [
+            {
+                "id": "place_789",
+                "displayName": {"text": "Riverside Park"},
+                "formattedAddress": "Riverside Park, New York, NY",
+                "location": {"latitude": 40.8, "longitude": -73.97},
+                "types": ["park"],
+            },
+            {
+                "id": "place_101",
+                "displayName": {"text": "Riverside, New York"},
+                "formattedAddress": "Riverside, New York",
+                "location": {"latitude": 42.2, "longitude": -75.5},
+                "types": ["locality"],
+            },
+        ]
+    }
+
+    def fake_request(method: str, url: str, payload_body: dict, field_mask: str):
+        assert method == "POST"
+        assert "/places:searchText" in url
+        assert payload_body["textQuery"] == "riverside new york"
+        assert payload_body["pageSize"] == 3
+        return DummyResponse(200, payload)
+
+    monkeypatch.setattr(google_places, "_request", fake_request)
+
+    client = TestClient(app)
+    response = client.post(
+        "/locations/resolve", json={"location_text": "riverside new york", "limit": 3}
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "results": [
+            {
+                "place_id": "place_789",
+                "name": "Riverside Park",
+                "address": "Riverside Park, New York, NY",
+                "location": {"lat": 40.8, "lng": -73.97},
+                "types": ["park"],
+            },
+            {
+                "place_id": "place_101",
+                "name": "Riverside, New York",
+                "address": "Riverside, New York",
+                "location": {"lat": 42.2, "lng": -75.5},
+                "types": ["locality"],
+            },
+        ]
+    }

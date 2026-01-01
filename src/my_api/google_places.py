@@ -7,7 +7,16 @@ from typing import Any
 import httpx
 from fastapi import HTTPException
 
-from my_api.schemas import LatLng, PlaceDetails, PlaceSummary, SearchRequest, SearchResponse
+from my_api.schemas import (
+    LatLng,
+    LocationResolveRequest,
+    LocationResolveResponse,
+    PlaceDetails,
+    PlaceSummary,
+    ResolvedLocation,
+    SearchRequest,
+    SearchResponse,
+)
 
 GOOGLE_PLACES_BASE_URL = os.getenv(
     "GOOGLE_PLACES_BASE_URL", "https://places.googleapis.com/v1"
@@ -47,6 +56,14 @@ _DETAILS_FIELD_MASK = (
     "currentOpeningHours,"
     "nationalPhoneNumber,"
     "websiteUri"
+)
+
+_RESOLVE_FIELD_MASK = (
+    "places.id,"
+    "places.displayName,"
+    "places.formattedAddress,"
+    "places.location,"
+    "places.types"
 )
 
 
@@ -254,3 +271,44 @@ def get_place_details(place_id: str) -> PlaceDetails:
         hours=_parse_hours(payload.get("regularOpeningHours")),
         open_now=_parse_open_now(payload.get("currentOpeningHours")),
     )
+
+
+def resolve_locations(request: LocationResolveRequest) -> LocationResolveResponse:
+    url = f"{GOOGLE_PLACES_BASE_URL}/places:searchText"
+    body = {"textQuery": request.location_text, "pageSize": request.limit}
+    response = _request("POST", url, body, _RESOLVE_FIELD_MASK)
+
+    if response.status_code >= 400:
+        logger.error(
+            "Google Places API error %s. response=%s",
+            response.status_code,
+            response.text,
+        )
+        raise HTTPException(
+            status_code=502,
+            detail=f"Google Places API error ({response.status_code}).",
+        )
+
+    try:
+        payload = response.json()
+    except ValueError as exc:
+        logger.error(
+            "Google Places API returned invalid JSON. response=%s",
+            response.text,
+        )
+        raise HTTPException(status_code=502, detail="Invalid Google response.") from exc
+
+    places = payload.get("places", [])
+    results = []
+    for place in places:
+        results.append(
+            ResolvedLocation(
+                place_id=place.get("id", ""),
+                name=_parse_display_name(place.get("displayName")),
+                address=place.get("formattedAddress"),
+                location=_parse_lat_lng(place.get("location")),
+                types=place.get("types"),
+            )
+        )
+
+    return LocationResolveResponse(results=results)

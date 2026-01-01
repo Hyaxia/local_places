@@ -5,8 +5,14 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from my_api.google_places import get_place_details, search_places
-from my_api.schemas import PlaceDetails, SearchRequest, SearchResponse
+from my_api.google_places import get_place_details, resolve_locations, search_places
+from my_api.schemas import (
+    LocationResolveRequest,
+    LocationResolveResponse,
+    PlaceDetails,
+    SearchRequest,
+    SearchResponse,
+)
 
 app = FastAPI(title="My API")
 logger = logging.getLogger("my_api.validation")
@@ -42,6 +48,11 @@ def places_search(request: SearchRequest) -> SearchResponse:
 @app.get("/places/{place_id}", response_model=PlaceDetails)
 def places_details(place_id: str) -> PlaceDetails:
     return get_place_details(place_id)
+
+
+@app.post("/locations/resolve", response_model=LocationResolveResponse)
+def locations_resolve(request: LocationResolveRequest) -> LocationResolveResponse:
+    return resolve_locations(request)
 
 
 if __name__ == "__main__":

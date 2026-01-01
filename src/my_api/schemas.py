@@ -76,6 +76,23 @@ class SearchResponse(BaseModel):
     next_page_token: str | None = None
 
 
+class LocationResolveRequest(BaseModel):
+    location_text: str = Field(min_length=1)
+    limit: int = Field(default=5, ge=1, le=10)
+
+
+class ResolvedLocation(BaseModel):
+    place_id: str
+    name: str | None = None
+    address: str | None = None
+    location: LatLng | None = None
+    types: list[str] | None = None
+
+
+class LocationResolveResponse(BaseModel):
+    results: list[ResolvedLocation]
+
+
 class PlaceDetails(BaseModel):
     place_id: str
     name: str | None = None
