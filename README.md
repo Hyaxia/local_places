@@ -12,6 +12,60 @@ uv run uvicorn my_api.main:app --host 0.0.0.0 --reload
 
 Open the API docs at http://127.0.0.1:8000/docs.
 
+## Places API
+
+Set the Google Places API key before running:
+
+```bash
+export GOOGLE_PLACES_API_KEY="your-key"
+```
+
+Endpoints:
+
+- `POST /places/search` (free-text query + filters)
+- `GET /places/{place_id}` (place details)
+
+Example search request:
+
+```json
+{
+  "query": "italian restaurant",
+  "filters": {
+    "types": ["restaurant"],
+    "open_now": true,
+    "min_rating": 4.0,
+    "price_levels": [1, 2]
+  },
+  "limit": 10
+}
+```
+
+Notes:
+
+- `filters.types` supports a single type (mapped to Google `includedType`).
+
+Example search request (curl):
+
+```bash
+curl -X POST http://127.0.0.1:8000/places/search \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "query": "italian restaurant",
+    "location_bias": {
+      "lat": 40.8065,
+      "lng": -73.9719,
+      "radius_m": 3000
+    },
+    "filters": {
+      "types": ["restaurant"],
+      "open_now": true,
+      "min_rating": 4.0,
+      "price_levels": [1, 2, 3]
+    },
+    "limit": 10
+  }'
+```
+
 ## Test
 
 ```bash
