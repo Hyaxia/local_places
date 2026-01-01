@@ -7,7 +7,7 @@ FastAPI starter template.
 ```bash
 uv venv
 uv pip install -e ".[dev]"
-uv run uvicorn my_api.main:app --host 0.0.0.0 --reload
+uv run --env-file .env uvicorn my_api.main:app --host 0.0.0.0 --reload
 ```
 
 Open the API docs at http://127.0.0.1:8000/docs.
@@ -47,8 +47,8 @@ Notes:
 Example search request (curl):
 
 ```bash
-curl -X POST http://127.0.0.1:8000/places/search \\
-  -H "Content-Type: application/json" \\
+curl -X POST http://127.0.0.1:8000/places/search \
+  -H "Content-Type: application/json" \
   -d '{
     "query": "italian restaurant",
     "location_bias": {

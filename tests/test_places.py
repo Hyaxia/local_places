@@ -1,3 +1,4 @@
+import json
 import logging
 
 from fastapi.testclient import TestClient
@@ -7,12 +8,17 @@ from my_api.main import app
 
 
 class DummyResponse:
-    def __init__(self, status_code: int, payload: dict):
+    def __init__(self, status_code: int, payload: dict, text: str | None = None):
         self.status_code = status_code
         self._payload = payload
+        self._text = text if text is not None else json.dumps(payload)
 
     def json(self) -> dict:
         return self._payload
+
+    @property
+    def text(self) -> str:
+        return self._text
 
 
 def test_places_search_returns_results(monkeypatch) -> None:
@@ -120,3 +126,19 @@ def test_places_search_rejects_invalid_min_rating(caplog) -> None:
 
     assert response.status_code == 422
     assert any("Validation error on POST /places/search" in record.message for record in caplog.records)
+
+
+def test_places_search_logs_google_error(caplog, monkeypatch) -> None:
+    payload = {"error": {"message": "API key invalid", "status": "PERMISSION_DENIED"}}
+
+    def fake_request(method: str, url: str, payload_body: dict, field_mask: str):
+        return DummyResponse(403, payload)
+
+    monkeypatch.setattr(google_places, "_request", fake_request)
+
+    client = TestClient(app)
+    with caplog.at_level(logging.ERROR, logger="my_api.google_places"):
+        response = client.post("/places/search", json={"query": "pizza"})
+
+    assert response.status_code == 502
+    assert any("Google Places API error 403" in record.message for record in caplog.records)

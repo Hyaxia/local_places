@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from typing import Any
 
@@ -11,6 +12,7 @@ from my_api.schemas import LatLng, PlaceDetails, PlaceSummary, SearchRequest, Se
 GOOGLE_PLACES_BASE_URL = os.getenv(
     "GOOGLE_PLACES_BASE_URL", "https://places.googleapis.com/v1"
 )
+logger = logging.getLogger("my_api.google_places")
 
 _PRICE_LEVEL_TO_ENUM = {
     0: "PRICE_LEVEL_FREE",
@@ -55,6 +57,10 @@ class _GoogleResponse:
 
     def json(self) -> dict[str, Any]:
         return self._response.json()
+
+    @property
+    def text(self) -> str:
+        return self._response.text
 
 
 def _api_headers(field_mask: str) -> dict[str, str]:
@@ -170,6 +176,11 @@ def search_places(request: SearchRequest) -> SearchResponse:
     response = _request("POST", url, _build_search_body(request), _SEARCH_FIELD_MASK)
 
     if response.status_code >= 400:
+        logger.error(
+            "Google Places API error %s. response=%s",
+            response.status_code,
+            response.text,
+        )
         raise HTTPException(
             status_code=502,
             detail=f"Google Places API error ({response.status_code}).",
@@ -178,6 +189,10 @@ def search_places(request: SearchRequest) -> SearchResponse:
     try:
         payload = response.json()
     except ValueError as exc:
+        logger.error(
+            "Google Places API returned invalid JSON. response=%s",
+            response.text,
+        )
         raise HTTPException(status_code=502, detail="Invalid Google response.") from exc
 
     places = payload.get("places", [])
@@ -207,6 +222,11 @@ def get_place_details(place_id: str) -> PlaceDetails:
     response = _request("GET", url, None, _DETAILS_FIELD_MASK)
 
     if response.status_code >= 400:
+        logger.error(
+            "Google Places API error %s. response=%s",
+            response.status_code,
+            response.text,
+        )
         raise HTTPException(
             status_code=502,
             detail=f"Google Places API error ({response.status_code}).",
@@ -215,6 +235,10 @@ def get_place_details(place_id: str) -> PlaceDetails:
     try:
         payload = response.json()
     except ValueError as exc:
+        logger.error(
+            "Google Places API returned invalid JSON. response=%s",
+            response.text,
+        )
         raise HTTPException(status_code=502, detail="Invalid Google response.") from exc
 
     return PlaceDetails(
