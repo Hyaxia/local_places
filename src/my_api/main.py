@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
@@ -14,7 +15,10 @@ from my_api.schemas import (
     SearchResponse,
 )
 
-app = FastAPI(title="My API")
+app = FastAPI(
+    title="My API",
+    servers=[{"url": os.getenv("OPENAPI_SERVER_URL", "http://maxims-macbook-air:8000")}],
+)
 logger = logging.getLogger("my_api.validation")
 
 
