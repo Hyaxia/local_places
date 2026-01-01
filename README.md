@@ -71,3 +71,11 @@ curl -X POST http://127.0.0.1:8000/places/search \
 ```bash
 uv run pytest
 ```
+
+## OpenAPI
+
+Generate the OpenAPI schema:
+
+```bash
+uv run python scripts/generate_openapi.py
+```
