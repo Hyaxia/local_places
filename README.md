@@ -1,4 +1,4 @@
-# My API
+# Local Places
 
 This repo is a fusion of two pieces:
 
