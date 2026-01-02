@@ -5,6 +5,9 @@ FastAPI starter template.
 ## Run locally
 
 ```bash
+# copy skill definition into the relevant folder (where the agent looks for it)
+# then run the server
+
 uv venv
 uv pip install -e ".[dev]"
 uv run --env-file .env uvicorn my_api.main:app --host 0.0.0.0 --reload
