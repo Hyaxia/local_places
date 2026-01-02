@@ -3,8 +3,8 @@ import logging
 
 from fastapi.testclient import TestClient
 
-import my_api.google_places as google_places
-from my_api.main import app
+import local_places.google_places as google_places
+from local_places.main import app
 
 
 class DummyResponse:
@@ -118,7 +118,7 @@ def test_places_details_returns_place(monkeypatch) -> None:
 
 def test_places_search_rejects_invalid_min_rating(caplog) -> None:
     client = TestClient(app)
-    with caplog.at_level(logging.ERROR, logger="my_api.validation"):
+    with caplog.at_level(logging.ERROR, logger="local_places.validation"):
         response = client.post(
             "/places/search",
             json={"query": "pizza", "filters": {"min_rating": 4.3}},
@@ -137,7 +137,7 @@ def test_places_search_logs_google_error(caplog, monkeypatch) -> None:
     monkeypatch.setattr(google_places, "_request", fake_request)
 
     client = TestClient(app)
-    with caplog.at_level(logging.ERROR, logger="my_api.google_places"):
+    with caplog.at_level(logging.ERROR, logger="local_places.google_places"):
         response = client.post("/places/search", json={"query": "pizza"})
 
     assert response.status_code == 502

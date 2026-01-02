@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from my_api.main import app
+from local_places.main import app
 
 
 def test_ping() -> None:

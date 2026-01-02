@@ -7,7 +7,7 @@ from typing import Any
 import httpx
 from fastapi import HTTPException
 
-from my_api.schemas import (
+from local_places.schemas import (
     LatLng,
     LocationResolveRequest,
     LocationResolveResponse,
@@ -21,7 +21,7 @@ from my_api.schemas import (
 GOOGLE_PLACES_BASE_URL = os.getenv(
     "GOOGLE_PLACES_BASE_URL", "https://places.googleapis.com/v1"
 )
-logger = logging.getLogger("my_api.google_places")
+logger = logging.getLogger("local_places.google_places")
 
 _PRICE_LEVEL_TO_ENUM = {
     0: "PRICE_LEVEL_FREE",

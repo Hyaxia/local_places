@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from my_api.main import app
+from local_places.main import app
 
 
 def main() -> None:

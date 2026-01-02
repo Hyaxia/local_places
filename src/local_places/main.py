@@ -6,8 +6,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from my_api.google_places import get_place_details, resolve_locations, search_places
-from my_api.schemas import (
+from local_places.google_places import get_place_details, resolve_locations, search_places
+from local_places.schemas import (
     LocationResolveRequest,
     LocationResolveResponse,
     PlaceDetails,
@@ -19,7 +19,7 @@ app = FastAPI(
     title="My API",
     servers=[{"url": os.getenv("OPENAPI_SERVER_URL", "http://maxims-macbook-air:8000")}],
 )
-logger = logging.getLogger("my_api.validation")
+logger = logging.getLogger("local_places.validation")
 
 
 @app.get("/ping")
@@ -62,4 +62,4 @@ def locations_resolve(request: LocationResolveRequest) -> LocationResolveRespons
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("my_api.main:app", host="0.0.0.0", port=8000)
+    uvicorn.run("local_places.main:app", host="0.0.0.0", port=8000)
