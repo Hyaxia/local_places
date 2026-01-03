@@ -99,3 +99,7 @@ Generate the OpenAPI schema:
 ```bash
 uv run python scripts/generate_openapi.py
 ```
+
+## License
+
+MIT.
